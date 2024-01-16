@@ -1302,7 +1302,7 @@ int32_t parse_mp_criteria_item_array(char **ptr, const char *item_string, int32_
 static int32_t nvt_load_mp_setting_criteria_from_csv(const char *filename)
 {
 	int32_t retval = 0;
-	const struct firmware *fw_entry = NULL;
+	const struct firmware *nt_fw_entry = NULL;
 	char *fbufp = NULL;
 	char *ptr = NULL;
 
@@ -1315,32 +1315,32 @@ static int32_t nvt_load_mp_setting_criteria_from_csv(const char *filename)
 		goto exit_free;
 	}
 
-	retval = request_firmware(&fw_entry, filename, &ts->client->dev);
+	retval = request_firmware(&nt_fw_entry, filename, &ts->client->dev);
 	if (retval) {
 		NVT_ERR("%s load failed, retval=%d\n", filename, retval);
 		retval = -1;
 		goto exit_free;
 	}
 
-	fbufp = (char *)kzalloc(fw_entry->size + 2, GFP_KERNEL);
+	fbufp = (char *)kzalloc(nt_fw_entry->size + 2, GFP_KERNEL);
 	if (!fbufp) {
-		NVT_ERR("kzalloc %zu bytes failed!\n", fw_entry->size);
+		NVT_ERR("kzalloc %zu bytes failed!\n", nt_fw_entry->size);
 		retval = -1;
 		goto exit_free;
 	}
 
-	memcpy(fbufp, fw_entry->data, fw_entry->size);
+	memcpy(fbufp, nt_fw_entry->data, nt_fw_entry->size);
 
-/* 	NVT_LOG("File Size: %zu\n", fw_entry->size);
+/* 	NVT_LOG("File Size: %zu\n", nt_fw_entry->size);
 	NVT_LOG("---------------------------------------------------\n");
 	printk("fbufp:\n");
-	for(i = 0; i < fw_entry->size; i++) {
+	for(i = 0; i < nt_fw_entry->size; i++) {
 		printk("%c", fbufp[i]);
 	}
 	NVT_LOG("---------------------------------------------------\n"); */
 
-	fbufp[fw_entry->size] = '\0';
-	fbufp[fw_entry->size + 1] = '\n';
+	fbufp[nt_fw_entry->size] = '\0';
+	fbufp[nt_fw_entry->size + 1] = '\n';
 
 	ptr = fbufp;
 	if (parse_mp_setting_criteria_item(&ptr, "IC_X_CFG_SIZE:", &IC_X_CFG_SIZE) < 0) {
@@ -1460,9 +1460,9 @@ static int32_t nvt_load_mp_setting_criteria_from_csv(const char *filename)
 	retval = 0;
 
 exit_free:
-	if (fw_entry) {
-		release_firmware(fw_entry);
-		fw_entry = NULL;
+	if (nt_fw_entry) {
+		release_firmware(nt_fw_entry);
+		nt_fw_entry = NULL;
 	}
 	if (fbufp) {
 		kfree(fbufp);
